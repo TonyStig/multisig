@@ -16,14 +16,15 @@ Web3Wallet.prototype.initProvider = function(host) {
 	var self = this;
 	self.host = host || 'http://localhost:8545';
 	console.log(self.host)
-	var provider = new HookedWeb3Provider({
-		  host: self.host,
-		  transaction_signer: { 
-		    // Can be any object that implements the following methods:
-		    hasAddress: function(address, callback) { },
-		    signTransaction: function(tx_params, callback) { }
-		  }
-	});
+	var provider = new Web3.providers.HttpProvider(self.host);
+//	var provider = new HookedWeb3Provider({
+//		  host: self.host,
+//		  transaction_signer: { 
+//		    // Can be any object that implements the following methods:
+//		    hasAddress: function(address, callback) { },
+//		    signTransaction: function(tx_params, callback) { }
+//		  }
+//	});
 	self.web3.setProvider(provider);
 }
 
