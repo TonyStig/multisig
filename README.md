@@ -4,6 +4,7 @@
 > **注意:**
 > - 所有的URL前缀为/api/v1，如/wallet/new的完整URL路径是/api/v1/wallet/new
 > - 所有的返回值都包含success，成功为true，失败为false。成功代表提交，不保证写入账本。
+> - 当success为false。返回值包含error，内容格式为{code: 100, error_message: "Secret is invalid."}。
 
 ## API 说明 ##
 
@@ -14,9 +15,15 @@
 
 #### 转账 ####
 
-* [转账 - POST - /account/{:source_address}/payments](#转账)
+* [转账 - POST - /account/{:address}/payments](#转账)
 * [查询转账 - GET - /account/{:address}/payments/{:hash}](#查询转账)
-* [查询历史 - GET - /account/{:address}/payments](#查询历史)
+* [查询转账历史 - GET - /account/{:address}/payments](#查询转账历史)
+
+#### 通用 ####
+
+* [Sign Transaction - POST - /tx/sign](#sign-transaction)
+* [Submit Transaction - POST - /tx/submit](#submit-transaction)
+* [Retrieve Transaction - GET - /tx/{:hash}](#retrieve-transaction)
 
 ## 生成钱包 ##
 
@@ -76,7 +83,7 @@ GET /api/v1/account/{:address}/balances
 ## 转账 ##
 
 ```
-POST /api/v1/accounts/{address}/payments
+POST /api/v1/account/{address}/payments
 
 {
   "secret": "a5...",
@@ -89,7 +96,7 @@ POST /api/v1/accounts/{address}/payments
 }
 ```
 
-请求的JSON对象包含以下参数:
+请求包含以下参数:
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -112,3 +119,85 @@ __不要将私钥发送到不安全的API REST服务器上__
 |-------|------|-------------|
 | success | Boolean | `true` 代表请求被当然账本接受，不代表最终在账本中生效。|
 | hash | String | 唯一的hash值，代表本次操作 |
+
+## 查询转账 ##
+
+```
+GET /api/v1/account/{:address}/payments/{:hash}
+```
+
+请求包含以下参数:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| address | String | 账户地址 |
+| hash | String | 操作的hash |
+
+#### 返回值 ####
+
+```js
+{
+  "success": true,
+  "payment": {
+    "source_account": "0xfa",
+    "destination_account": "0xf01...",
+    "currency" : "PANDA",
+    "amount" : "5.01",
+    "issuer" : "0x11...",
+    "hash": "9D591B18EDDD34F0B6CF4223A2940AEA2C3CC778925BABF289E0011CD8FA056E",
+    "block": "8924146"
+    }
+  },
+  "state": "validated"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| payment | Object | 包含了发起方source_account的Object |
+| hash | String | Transaction Hash |
+| block | String | 交易提交时的区块数 |
+| state | String | 此交易是否有效 |
+
+## 查询转账历史 ##
+
+```
+GET /api/v1/account/{:address}/payments?limit=10&start_block=10000&end_block=12000
+```
+
+请求包含以下参数:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| address | String | 账户地址 |
+| limit | Integer | 选填。返回数量，默认50 |
+| start\_block | Integer | 暂不支持 |
+| end\_block | Integer | 暂不支持 |
+
+#### 返回值 ####
+
+```js
+{
+  "success": true,
+  "payments": [
+    "payment": {
+	    "source_account": "0xfa",
+	    "destination_account": "0xf01...",
+	    "currency" : "PANDA",
+	    "amount" : "5.01",
+	    "issuer" : "0x11...",
+	    "hash": "9D591B18EDDD34F0B6CF4223A2940AEA2C3CC778925BABF289E0011CD8FA056E",
+	    "block": "8924146"
+	},
+    "payment": {
+	    "source_account": "0xfa",
+	    "destination_account": "0xf01...",
+	    "currency" : "PANDA",
+	    "amount" : "100.88",
+	    "issuer" : "0x11...",
+	    "hash": "8AD....",
+	    "block": "8924145"
+	}
+  ]
+}
+```
