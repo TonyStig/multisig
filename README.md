@@ -2,7 +2,8 @@
 为外部系统调用设计。
 
 > **注意:**
-> 所有的URL前缀为/api/v1，如/wallet/new的完整URL路径是/api/v1/wallet/new
+> - 所有的URL前缀为/api/v1，如/wallet/new的完整URL路径是/api/v1/wallet/new
+> - 所有的返回值都包含success，成功为true，失败为false。成功代表提交，不保证写入账本。
 
 ## API 说明 ##
 
@@ -11,13 +12,18 @@
 * [生成钱包 - GET - /wallet/new](#生成钱包)
 * [查询余额 - GET - /account/{:address}/balances](#查询余额)
 
+#### 转账 ####
+
+* [转账 - POST - /account/{:source_address}/payments](#转账)
+* [查询转账 - GET - /account/{:address}/payments/{:hash}](#查询转账)
+* [查询历史 - GET - /account/{:address}/payments](#查询历史)
 
 ## 生成钱包 ##
 
 随机生成一个新的钱包，返回地址和私钥。
 
 ```
-GET /v1/wallet/new
+GET /api/v1/wallet/new
 ```
 
 *注意:* 有私钥就能完整控制钱包。所以不要将私钥在非安全的服务器和非HTTPS互联网上转输。
@@ -37,7 +43,7 @@ GET /v1/wallet/new
 ## 查询余额 ##
 
 ```
-GET /v1/account/{:address}/balances
+GET /api/v1/account/{:address}/balances
 ```
 
 必填参数:
@@ -67,3 +73,42 @@ GET /v1/account/{:address}/balances
 }
 ```
 
+## 转账 ##
+
+```
+POST /api/v1/accounts/{address}/payments
+
+{
+  "secret": "a5...",
+  "payment": {
+    "destination_account": "0xf01...",
+    "currency" : "PANDA",
+    "amount" : "5.01",
+    "issuer" : "0x11..."
+  }
+}
+```
+
+请求的JSON对象包含以下参数:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| address | String | 发起转账账户的地址 |
+| secret | String | 账户私钥 |
+| payment | Payment object | 包含目标账户，货币代码和金额，发行方issuer选填 |
+
+__不要将私钥发送到不安全的API REST服务器上__
+
+#### 返回值 ####
+
+```js
+{
+  "success": true,
+  "hash": "C32A85BA3EE9071D35E583D9062E5B8C327C28BB834B45B882651DD7E50CEA1C"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| success | Boolean | `true` 代表请求被当然账本接受，不代表最终在账本中生效。|
+| hash | String | 唯一的hash值，代表本次操作 |
