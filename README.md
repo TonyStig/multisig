@@ -126,7 +126,7 @@ __不要将私钥发送到不安全的API REST服务器上__
 GET /api/v1/account/{:address}/payments/{:hash}
 ```
 
-请求包含以下参数:
+实现可参照[`Retrieve Transaction`](#retrieve-transaction)。请求包含以下参数:
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -199,5 +199,109 @@ GET /api/v1/account/{:address}/payments?limit=10&start_block=10000&end_block=120
 	    "block": "8924145"
 	}
   ]
+}
+```
+
+# 通用 #
+
+## Sign Transaction ##
+
+签名一个交易但不提交。返回签好名的交易
+
+```
+POST /api/v1/tx/sign
+
+{
+  "secret": "a5...",
+  "tx_json" : {
+    "nonce": "0xe",
+    "gasPrice": "0x4a817c800",
+    "gasLimit": "0x493e0",
+    "to": "0xA494B85566a591B246B481039aD06eeA1a9CDc90",
+    "from": "0xffDF1F2881f0f8C5b2B572a261c85058D5a113B7",
+    "value": "0x00",
+    "data": "0xa9059cbb0000000000000000000000001552f2d8c79ccee276dfd399229f6985383926a40000000000000000000000000000000000000000000000000000000000000120"
+  }
+}
+```
+The request body must be a JSON object with the following fields:
+
+| Field | Value | Description |
+|-------|-------|-------------|
+| tx_json | Object | A transaction object |
+| secret | String | The secret for the account that is creating the transaction |
+
+#### 返回值 ####
+
+The result is a JSON object, with a field `tx_hex` containing a signed transaction, and a field `hash` containing the transaction's hash.
+
+```js
+{
+  "success": true,
+  "tx_hex": "f8aa0f8504a817c800830493e094a494b85566a591b246b481039ad06eea1a9cdc9080b844a9059cbb0000000000000000000000001552f2d8c79ccee276dfd399229f6985383926a400000000000000000000000000000000000000000000000000000000000001201ba0c845411a75c611c0bd72642448297ea992e447437d797a49776cd04ed13bb2a9a07a21527d611b733149c8839f2a1cd1ef63cccab50945381bf6da573ef72995c4"
+}
+```
+
+## Submit Transaction ##
+
+Submits a signed transaction to the Network.
+
+```
+POST /v1/tx/submit
+
+{
+  "tx_hex" : "f8aa0f8504a817c800830493e094a494b85566a591b246b481039ad06eea1a9cdc9080b844a9059cbb0000000000000000000000001552f2d8c79ccee276dfd399229f6985383926a400000000000000000000000000000000000000000000000000000000000001201ba0c845411a75c611c0bd72642448297ea992e447437d797a49776cd04ed13bb2a9a07a21527d611b733149c8839f2a1cd1ef63cccab50945381bf6da573ef72995c4"
+}
+```
+
+The following URL parameters are required by this API endpoint:
+
+| Field | Value | Description |
+|-------|-------|-------------|
+| tx_hex | String | A signed transaction as returned by [`Sign Transaction`](#sign-transaction) endpoint |
+
+#### 返回值 ####
+
+The result is a JSON object, with a field `hash` containing the result of the submission. A successful submission means that the transaction is pending validation, it is not valid until it has been accepted into a validated block.
+
+```js
+{
+  "success": true,
+  "hash": "0xab63a792b883b4909a412f74087db48a25c76d60c5c2d02b28406cfee4541288"
+}
+```
+
+## Retrieve Transaction ##
+
+Returns a transaction, in its complete, original format.
+
+```
+GET /v1/tx/{:hash}
+```
+
+The following URL parameters are required by this API endpoint:
+
+| Field | Value | Description |
+|-------|-------|-------------|
+| hash | String | A unique identifier for the transaction to retrieve. |
+
+#### 返回值 ####
+
+The result is a JSON object, whose `payment` field has the requested transaction.
+
+```js
+{
+  "success": true,
+  "payment": {
+    "source_account": "0xfa",
+    "destination_account": "0xf01...",
+    "currency" : "PANDA",
+    "amount" : "5.01",
+    "issuer" : "0x11...",
+    "hash": "9D591B18EDDD34F0B6CF4223A2940AEA2C3CC778925BABF289E0011CD8FA056E",
+    "block": "8924146"
+    }
+  },
+  "state": "validated"
 }
 ```
