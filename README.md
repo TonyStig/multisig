@@ -1,5 +1,5 @@
 # API 服务 #
-为外部系统调用设计。
+封装区块链服务，用于外部系统与区块链交互。
 
 > **注意:**
 > - 所有的URL前缀为/api/v1，如/wallet/new的完整URL路径是/api/v1/wallet/new
@@ -247,7 +247,7 @@ The result is a JSON object, with a field `tx_hex` containing a signed transacti
 Submits a signed transaction to the Network.
 
 ```
-POST /v1/tx/submit
+POST /api/v1/tx/submit
 
 {
   "tx_hex" : "f8aa0f8504a817c800830493e094a494b85566a591b246b481039ad06eea1a9cdc9080b844a9059cbb0000000000000000000000001552f2d8c79ccee276dfd399229f6985383926a400000000000000000000000000000000000000000000000000000000000001201ba0c845411a75c611c0bd72642448297ea992e447437d797a49776cd04ed13bb2a9a07a21527d611b733149c8839f2a1cd1ef63cccab50945381bf6da573ef72995c4"
@@ -276,7 +276,7 @@ The result is a JSON object, with a field `hash` containing the result of the su
 Returns a transaction, in its complete, original format.
 
 ```
-GET /v1/tx/{:hash}
+GET /api/v1/tx/{:hash}
 ```
 
 The following URL parameters are required by this API endpoint:
